@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>近未来. - rui</title>
+        <link href="https://cdn.jsdelivr.net/npm/semantic-ui-css@2.5.0/semantic.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/semantic-ui-css@2.5.0/components/card.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/semantic-ui-css@2.5.0/semantic.min.js"></script>
+        <title>Snowflake Animation</title>
+        <style>
+            body {
+                margin: 0;
+                background: transparent;
+                overflow-x: hidden;
+            }
+
+            .snowflake {
+                position: fixed;
+                top: -10px;
+                color: black;
+                font-size: 10px;
+                animation: fall linear infinite;
+                opacity: 0.8;
+            }
+
+            @keyframes fall {
+                0% {
+                    transform: translateX(0px) translateY(0px) rotate(0deg);
+                    opacity: 0.8;
+                }
+
+                50% {
+                    transform: translateX(30px) translateY(50vh) rotate(180deg);
+                }
+
+                100% {
+                    transform: translateX(-30px) translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+
+            .control-panel {
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                z-index: 1000;
+                background: #d8e6e2;
+                /* 修复背景颜色语法 */
+                color: black;
+                padding: 10px;
+                border-radius: 5px;
+                font-family: Arial, sans-serif;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+                /* 添加阴影效果 */
+            }
+
+            .control-panel button {
+                background: white;
+                color: black;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 3px;
+                cursor: pointer;
+                transition: background 0.3s ease, box-shadow 0.3s ease;
+                /* 添加过渡效果 */
+            }
+
+            .control-panel button:hover {
+                background: #f0f0f0;
+                /* 鼠标悬停时改变背景色 */
+                box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+                /* 添加悬停阴影 */
+            }
+
+            /* 响应式设计：小屏幕优化 */
+            @media (max-width: 600px) {
+                .control-panel {
+                    top: 5px;
+                    right: 5px;
+                    padding: 8px;
+                }
+
+                .control-panel button {
+                    padding: 4px 8px;
+                    font-size: 14px;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="control-panel">
+            <button id="toggleSnow">Disable Snow</button>
+        </div>
+        <button id="theme-toggle" aria-label="Toggle Dark Mode">🌙</button>
+        <script>
+            const snowflakeCharacters = ["❄", "❅", "❆", "✻", "✼", "✽"];
+            let snowflakeInterval = null;
+            // 定时器变量
+            let snowEnabled = true;
+            // 雪花开关状态
+            let currentSnowflakeCount = 0;
+            // 当前页面上的雪花数量
+            const MAX_SNOWFLAKES = 100;
+            // 最大雪花数量限制
+
+            function createSnowflake() {
+                if (currentSnowflakeCount >= MAX_SNOWFLAKES)
+                    return;
+                // 如果雪花数量超过限制，停止创建
+
+                const snowflake = document.createElement("div");
+                snowflake.className = "snowflake";
+                snowflake.textContent = snowflakeCharacters[Math.floor(Math.random() * snowflakeCharacters.length)];
+                snowflake.style.left = Math.random() * 100 + "vw";
+                snowflake.style.animationDuration = 4 + Math.random() * 4 + "s";
+                snowflake.style.fontSize = 10 + Math.random() * 20 + "px";
+                snowflake.style.opacity = 0.4 + Math.random() * 0.4;
+
+                document.body.appendChild(snowflake);
+                currentSnowflakeCount++;
+                // 增加雪花计数
+
+                // 动画结束后移除雪花
+                snowflake.addEventListener("animationend", () => {
+                    snowflake.remove();
+                    currentSnowflakeCount--;
+                    // 减少雪花计数
+                }
+                );
+            }
+
+            function initializeSnowflakes(count) {
+                // 定时创建雪花
+                snowflakeInterval = setInterval( () => {
+                    for (let i = 0; i < count; i++) {
+                        createSnowflake();
+                    }
+                }
+                , 500);
+            }
+
+            function clearSnowflakes() {
+                // 清除所有雪花
+                const snowflakes = document.querySelectorAll(".snowflake");
+                snowflakes.forEach( (snowflake) => snowflake.remove());
+                currentSnowflakeCount = 0;
+                // 重置雪花计数
+            }
+
+            function toggleSnow() {
+                snowEnabled = !snowEnabled;
+
+                if (snowEnabled) {
+                    // 开启雪花
+                    const isMobile = window.innerWidth <= 768;
+                    const snowflakeCount = isMobile ? 1 : 2;
+                    // 每次创建的雪花数量
+                    initializeSnowflakes(snowflakeCount);
+                    document.getElementById("toggleSnow").textContent = "Disable Snow";
+                } else {
+                    // 停止雪花
+                    clearInterval(snowflakeInterval);
+                    clearSnowflakes();
+                    document.getElementById("toggleSnow").textContent = "Enable Snow";
+                }
+            }
+
+            // 初始化雪花效果
+            const isMobile = window.innerWidth <= 768;
+            const snowflakeCount = isMobile ? 1 : 2;
+            // 每次创建的雪花数量
+            initializeSnowflakes(snowflakeCount);
+
+            // 添加按钮事件
+            document.getElementById("toggleSnow").addEventListener("click", toggleSnow);
+            // 防止重复执行
+            (function() {
+                // 如果已经初始化过，则不再执行
+                if (window.themeInitialized)
+                    return;
+                window.themeInitialized = true;
+
+                // 等待页面加载完成
+                document.addEventListener('DOMContentLoaded', function() {
+                    // 获取存储的主题设置
+                    const currentTheme = localStorage.getItem('theme');
+
+                    // 如果用户之前选择了暗黑模式，则应用暗黑模式
+                    if (currentTheme === 'dark') {
+                        document.body.classList.add('dark-mode');
+                    }
+
+                    // 获取切换按钮
+                    const themeToggleButton = document.getElementById('theme-toggle');
+
+                    // 切换暗黑模式与正常模式
+                    themeToggleButton.addEventListener('click', function() {
+                        document.body.classList.toggle('dark-mode');
+                        // 切换 'dark-mode' 类
+
+                        // 如果当前是暗黑模式，存储 'dark'，否则存储 'light'
+                        if (document.body.classList.contains('dark-mode')) {
+                            localStorage.setItem('theme', 'dark');
+                            themeToggleButton.textContent = '🌕';
+                            // 设置为亮模式图标
+                        } else {
+                            localStorage.setItem('theme', 'light');
+                            themeToggleButton.textContent = '🌙';
+                            // 设置为暗模式图标
+                        }
+                    });
+                });
+            }
+            )();
+        </script>
+        <header>
+            <div id="head" class="ui inverted vertical masthead center aligned segment">
+                <div id="nav" class="ui container">
+                    <div class="ui large secondary inverted menu">
+                        <div class="item">
+                            <p id="hitokoto">条条大路通罗马</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="title" class="ui text container">
+                    <h1 class="ui inverted header">
+                        <i class="spinner icon"></i>
+                        <div class="content">
+                            For<div class="sub header">Xylonstar</div>
+                        </div>
+                    </h1>
+                    <div class="ui left corner labeled right icon fluid large input">
+                        <div class="ui left corner label">
+                            <img id="search-fav" class="left floated avatar ui image" src="https://www.google.com/favicon.ico"></img>
+                        </div>
+                        <input id="searchinput" type="search" placeholder="come on……" autocomplete="off"></input>
+                        <i class="inverted circular search link icon"></i>
+                    </div>
+                    <div id="sengine" class="ui bottom attached tabular inverted secondary menu">
+                        <div class="header item">&nbsp;</div>
+                        <a class="active item" data-url="https://www.google.com/search?q=$s">Google</a>
+                        <a class="item" data-url="https://www.bing.com/search?q=$s">Bing</a>
+                        <a class="item" data-url="https://www.sogou.com/web?query=$s">Sogou</a>
+                        <a class="item" data-url="https://www.baidu.com/s?wd=$s">Baidu</a>
+                    </div>
+              
+                </div>
+            </div>
+        </header>
+        <main style="width: 100%; max-width: 2160px; margin: 0 auto;">
+            <div class="ui container">
+    
+             
+                <div class="ui basic segment">
+                    <h4 class="ui horizontal divider header">
+                        <i class="youtube icon"></i>
+                        Watch movies online
+                    </h4>
+                    <div class="ui five stackable cards">
+                        <a class="card" href=https://dianyi.ng/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://s2.loli.net/2025/02/17/1CVPwmXoicOKlqJ.png></img>
+                                <div class="header">电影先生</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.freeok.my/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://s2.loli.net/2025/02/17/Ml5OHusez6yQaXK.png></img>
+                                <div class="header">Freeok</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://kimivod.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://s2.loli.net/2025/02/17/TWbLhJzHkymjYf9.png></img>
+                                <div class="header">Kimivod</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://lkvod.me/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://img.xylonstar.ggff.net/file/GCO5YsDE.png></img>
+                                <div class="header">来看点播</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.nivod.vip/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://img.xylonstar.ggff.net/file/aJNba4VY.png></img>
+                                <div class="header">泥视频</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.6umkq9b.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.6umkq9b.com></img>
+                                <div class="header">金牌影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://dsxys.pro/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://img.xylonstar.ggff.net/file/qeNrmga9.png></img>
+                                <div class="header">大师兄影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://wu5mz.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=wu5mz.com></img>
+                                <div class="header">5555电影</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                     
+                        <a class="card" href=https://www.dandanzan.club/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://img.xylonstar.ggff.net/file/f8CbVCZ6.png></img>
+                                <div class="header">蛋蛋赞影院</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://94itv.app/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://img.xylonstar.ggff.net/file/6bef69wO.png></img>
+                                <div class="header">94影城</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://gimy.cc/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://img.xylonstar.ggff.net/file/v5GOxITG.png></img>
+                                <div class="header">gimy</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://imaple8.co/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://img.xylonstar.ggff.net/file/fSELWIDN.png></img>
+                                <div class="header">枫林网</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.libvio.vip/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://img.xylonstar.ggff.net/file/YvZlgixI.png></img>
+                                <div class="header">LIVIBO</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.netflixgc.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.netflixgc.com></img>
+                                <div class="header">奈飞工厂</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.jukankan.tv/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://img.xylonstar.ggff.net/file/aezisJdP.ico></img>
+                                <div class="header">剧看看</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://ygg01.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://img.xylonstar.ggff.net/file/ZD5q2DgH.png></img>
+                                <div class="header">yigeG</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+
+                        <a class="card" href=https://www.ncat1.app/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.ncat1.app></img>
+                                <div class="header">网飞猫</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.novipnoad.net/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://img.xylonstar.ggff.net/file/XJp3fyQ4.ico></img>
+                                <div class="header">NO视频</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.wiys.lol/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.wiys.lol></img>
+                                <div class="header">爱影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://bttwo.vip/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://img.xylonstar.ggff.net/file/5ZVKzj3N.ico></img>
+                                <div class="header">两个BT</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.hdmoli.pro/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://img.xylonstar.ggff.net/file/6tI7uIdt.png></img>
+                                <div class="header">Hdmoli</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.subaibaiys.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.subaibaiys.com></img>
+                                <div class="header">素白白影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.hanjukankan.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.hanjukankan.com></img>
+                                <div class="header">韩剧看看</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.iyf.lv/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.iyf.lv></img>
+                                <div class="header">爱壹帆</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+
+                        <a class="card" href=https://vidhub.me/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=vidhub.me></img>
+                                <div class="header">VidHub</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.mp4be.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.mp4be.com></img>
+                                <div class="header">美柏影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.duse1.com target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.duse1.com></img>
+                                <div class="header">91毒舌</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.duboku.tv/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.duboku.tv></img>
+                                <div class="header">独播库</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://darkvod.cc/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=darkvod.cc></img>
+                                <div class="header">黑夜影院</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.ziziys.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.ziziys.com></img>
+                                <div class="header">子子影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.69mj.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.69mj.com></img>
+                                <div class="header">69美剧</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://ddys.pro/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=ddys.pro></img>
+                                <div class="header">低端影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+
+                        <a class="card" href=https://4k-av.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=4k-av.com></img>
+                                <div class="header">4K</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.akys.info/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.akys.info></img>
+                                <div class="header">爱看影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://wantwatch.me/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=wantwatch.me></img>
+                                <div class="header">魔法解析</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.czzy77.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.czzy77.com></img>
+                                <div class="header">厂长资源</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.pipi15.tv/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.pipi15.tv></img>
+                                <div class="header">皮皮影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.meiyd12.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.meiyd12.com></img>
+                                <div class="header">美益达影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.jiaozi.me/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.jiaozi.me></img>
+                                <div class="header">饺子影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.xlys01.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.xlys01.com></img>
+                                <div class="header">修罗影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+
+                        <a class="card" href=https://www.1dm2.cc/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.1dm2.cc></img>
+                                <div class="header">第一动漫网</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://v.warhut.cn/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=v.warhut.cn></img>
+                                <div class="header">WarHut</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.qdm8.com target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.qdm8.com></img>
+                                <div class="header">趣动漫</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://wdoo.net/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=wdoo.net></img>
+                                <div class="header">聚合搜索</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://v.taijuwang.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=v.taijuwang.com></img>
+                                <div class="header">泰剧网</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.llyady.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.llyady.com></img>
+                                <div class="header">LLYA</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://qingwa.org/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=qingwa.org></img>
+                                <div class="header">青蛙电影网</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.svip1.fun/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.svip1.fun></img>
+                                <div class="header">人人影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+
+                        <a class="card" href=https://ww4.fmovies.co/home/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=ww4.fmovies.co/home/></img>
+                                <div class="header">FMOVIES</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.bahaotv.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.bahaotv.com></img>
+                                <div class="header">八号影院</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://v.aikanbot.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=v.aikanbot.com></img>
+                                <div class="header">爱看机器人</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.klyingshi2.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.klyingshi2.com></img>
+                                <div class="header">可乐影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.flixflop.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.flixflop.com></img>
+                                <div class="header">飞流视频</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.tyys2.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.tyys2.com></img>
+                                <div class="header">统一影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.fantuan.vip/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.fantuan.vip></img>
+                                <div class="header">饭团影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://sn1817.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=sn1817.com></img>
+                                <div class="header">1817</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+
+                        <a class="card" href=https://www.duoduotv.cc target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.duoduotv.cc></img>
+                                <div class="header">多多视频</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://ww88.taieea.sbs/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=ww88.taieea.sbs></img>
+                                <div class="header">太乙电影</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://wyjc.life/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=wyjc.life></img>
+                                <div class="header">午夜剧场</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.5o5k.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.5o5k.com></img>
+                                <div class="header">蘑菇影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.quickvod.cc/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.quickvod.cc></img>
+                                <div class="header">快点播</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://hellociqryx6e.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=hellociqryx6e.com></img>
+                                <div class="header">极光影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.freehd.vip/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.freehd.vip></img>
+                                <div class="header">FreeHD</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                        <a class="card" href=https://www.zhenlang.cc/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.zhenlang.cc></img>
+                                <div class="header">真狼影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+
+                        <a class="card" href=https://gaze.run/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=gaze.run></img>
+                                <div class="header">注视影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a> <a class="card" href=https://www.kpkuang.one/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.kpkuang.one></img>
+                                <div class="header">狂人</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a> <a class="card" href=https://www.yirenmeng.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.yirenmeng.com></img>
+                                <div class="header">番茄影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a> <a class="card" href=https://www.4kvm.tv/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.4kvm.tv></img>
+                                <div class="header">4k影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a> <a class="card" href=https://www.kankanwu.cc/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.kankanwu.cc></img>
+                                <div class="header">看看屋</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a> <a class="card" href=https://www.juyeye.cc/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.juyeye.cc></img>
+                                <div class="header">剧爷爷</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a> <a class="card" href=https://www.kkys03.com/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.kkys03.com></img>
+                                <div class="header">可可影视</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a> <a class="card" href=https://www.dandantu.cc/ target="_blank">
+                            <div class="content">
+                                <img class="right floated avatar ui image" src=https://www.google.com/s2/favicons?domain=www.dandantu.cc></img>
+                                <div class="header">蛋蛋兔</div>
+                                <div class="meta"></div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+              
+            </div>
+        </main>
+
+        <script src="https://v1.hitokoto.cn/?encode=js&select=%23hitokoto" defer></script>
+        <script>
+            $('#sengine a').on('click', function(e) {
+                $('#sengine a.active').toggleClass('active');
+                $(e.target).toggleClass('active');
+                $('#search-fav').attr('src', $(e.target).data('url').match(/https{0,1}:\/\/\S+\//)[0] + '/favicon.ico');
+            });
+            $('.search').on('click', function(e) {
+                var url = $('#sengine a.active').data('url');
+                url = url.replace(/\$s/, $('#searchinput').val());
+                window.open(url);
+            });
+            /* 鼠标聚焦时，回车事件 */
+            $("#searchinput").bind("keypress", function() {
+                if (event.keyCode == 13) {
+                    // 触发需要调用的方法
+                    $(".search").click();
+                }
+            });
+            $('#menubtn').on('click', function(e) {
+                $('#seller').modal('show');
+            });
+        </script>
+        <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"rayId":"913307f2f92dcf0e","version":"2025.1.0","r":1,"token":"a1462ff371fb4536a56a4175f99d2d77","serverTiming":{"name":{"cfExtPri":true,"cfL4":true,"cfSpeedBrain":true,"cfCacheStatus":true}}}' crossorigin="anonymous"></script>
+    </body>
+    <style>
+        /* 默认 (正常模式) 样式 */
+        body {
+            background-color: #d8e6e2;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* 暗黑模式的样式 */
+        body.dark-mode {
+            background-color: #1b1c1d;
+            /* 将背景色调亮一点 */
+            color: #fff;
+            /* 文字颜色改为白色 */
+        }
+
+        /* 右侧中央的暗黑模式开关按钮 */
+        #theme-toggle {
+            position: fixed;
+            right: 10px;
+            top: 10%;
+            transform: translateY(-50%);
+            background-color: transparent;
+            border: 3px solid #ccc;
+            color: #333;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            z-index: 1000;
+            transition: color 0.3s, border-color 0.3s;
+        }
+
+        /* 暗黑模式下的按钮样式 */
+        body.dark-mode #theme-toggle {
+            border-color: #d8e6e2;
+            color: #fff;
+        }
+    </style>
+    <i class="china flag"></i>
+
+
+    <div id="sakana-widget" style="position: fixed;bottom: 20px;right:40px;"></div>
+    <script>
+        function initSakanaWidget() {
+            const takina = SakanaWidget.getCharacter('takina');
+            takina.initialState = {
+                ...takina.initialState,
+                i: 0.001,
+                d: 1,
+            };
+            SakanaWidget.registerCharacter('takina-slow', takina);
+            new SakanaWidget({
+                autoFit: true
+            }).setState({
+                i: 0.001,
+                d: 1
+            }).mount('#sakana-widget');
+        }
+    </script>
+
+    <script async onload="initSakanaWidget()" src="https://cdn.jsdelivr.net/npm/sakana-widget@2.2.2/lib/sakana.min.js"></script>
+</html>
